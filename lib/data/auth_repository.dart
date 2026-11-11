@@ -1,52 +1,71 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// Thrown by AuthRepository with a message you can show to the user. Given.
 class AuthFailure implements Exception {
   AuthFailure(this.message);
+
   final String message;
+
   @override
   String toString() => 'AuthFailure($message)';
 }
 
-/// Part 2: email + password sign-in with Firebase Authentication.
 class AuthRepository {
   AuthRepository(this._auth);
 
   final FirebaseAuth _auth;
 
-  /// Emits the signed-in user, or null after sign-out. Given.
-  Stream<User?> authStateChanges() => _auth.authStateChanges();
+  Stream<User?> authStateChanges() =>
+      _auth.authStateChanges();
 
   User? get currentUser => _auth.currentUser;
 
-  /// Signs in with _auth.signInWithEmailAndPassword (email trimmed).
-  /// A FirebaseAuthException becomes AuthFailure(messageFor(e.code)).
+  // Sign in
   Future<void> signIn(String email, String password) async {
-    // TODO(2)
-    throw UnimplementedError('signIn');
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      throw AuthFailure(messageFor(e.code));
+    }
   }
 
-  /// Same as signIn, with _auth.createUserWithEmailAndPassword.
+  // Sign up
   Future<void> signUp(String email, String password) async {
-    // TODO(2)
-    throw UnimplementedError('signUp');
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      throw AuthFailure(messageFor(e.code));
+    }
   }
 
+  // Sign out
   Future<void> signOut() async {
-    // TODO(2)
-    throw UnimplementedError('signOut');
+    await _auth.signOut();
   }
 
-  /// A friendly message for a FirebaseAuthException code:
-  ///   'invalid-email'          -> 'The email address is not valid.'
-  ///   'weak-password'          -> 'The password must be at least 6 characters.'
-  ///   'email-already-in-use'   -> 'An account already exists for this email.'
-  ///   'invalid-credential', 'wrong-password', 'user-not-found'
-  ///                            -> 'Wrong email or password.'
-  ///   'network-request-failed' -> 'No connection. Check your network.'
-  ///   anything else            -> 'Sign-in failed. Please try again.'
+  // Friendly error messages
   static String messageFor(String code) {
-    // TODO(2) - a switch expression is the cleanest way
-    throw UnimplementedError('messageFor');
+    switch (code) {
+      case 'invalid-email':
+        return 'The email address is not valid.';
+      case 'weak-password':
+        return 'The password must be at least 6 characters.';
+      case 'email-already-in-use':
+        return 'An account already exists for this email.';
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'user-not-found':
+        return 'Wrong email or password.';
+      case 'network-request-failed':
+        return 'No connection. Check your network.';
+      default:
+        return 'Sign-in failed. Please try again.';
+    }
   }
 }
