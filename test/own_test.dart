@@ -13,5 +13,19 @@ void main() {
     expect(AuthRepository.messageFor('weak-password'), contains('6 characters'));
   });
 
-  // TODO(7): your tests
+  
+test('invalid email shows a friendly message', () {
+  expect(
+    AuthRepository.messageFor('invalid-email'),
+    contains('email'),
+  );
+});
+
+test('network failure shows a helpful message', () {
+  expect(
+    AuthRepository.messageFor('network-request-failed'),
+    contains('connection'),
+  );
+});
+
 }
